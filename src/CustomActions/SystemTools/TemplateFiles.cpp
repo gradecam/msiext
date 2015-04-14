@@ -114,6 +114,20 @@ CA_API UINT __stdcall TemplateFiles_Rollback(MSIHANDLE hInstall)
     return ERROR_NOT_SUPPORTED;
 }
 
+std::wstring escape(std::wstring const &s)
+{
+    std::size_t n = s.length();
+    std::wstring escaped;
+    escaped.reserve(n * 2);        // pessimistic preallocation
+
+    for (std::size_t i = 0; i < n; ++i) {
+        if (s[i] == L'\\' || s[i] == L'"')
+            escaped += L'\\';
+        escaped += s[i];
+    }
+    return escaped;
+}
+
 CA_API UINT __stdcall TemplateFiles_Deferred(MSIHANDLE hInstall)
 {
 	MSI_EXCEPTION_HANDLER_PROLOG;
@@ -141,7 +155,7 @@ CA_API UINT __stdcall TemplateFiles_Deferred(MSIHANDLE hInstall)
             {
                 std::wstring name = xmlDocument.GetAttributeValue(L"name", property_row);
                 std::wstring value = xmlDocument.GetAttributeValue(L"value", property_row);
-                properties[name] = value;
+                    properties[name] = escape(value);
             }
         }
 
